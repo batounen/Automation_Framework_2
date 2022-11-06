@@ -75,26 +75,13 @@ public final class Driver {
 
     /**
      * Method to create WebDriver object
-     *
      * @throws Exception
      */
-//    public static void createDriver() throws Exception {
-//        switch (browser.toLowerCase()) {
-//            case "chrome":
-//                driverPool.set(createChromeDriver());
-//                break;
-//            case "firefox":
-//                driverPool.set(createFirefoxDriver());
-//                break;
-//            default:
-//                throw new Exception("Unknown browser type entered.");
-//        }
-//    }
     public static void createDriver() throws Exception {
         if (enableGrid) {
-            createRemoteDriver();
+            driverPool.set(createRemoteDriver());
         } else {
-            createLocalDriver();
+            driverPool.set(createLocalDriver());
         }
     }
 
@@ -103,11 +90,10 @@ public final class Driver {
      *
      * @throws MalformedURLException
      */
-    private static void createRemoteDriver() throws MalformedURLException {
+    private static WebDriver createRemoteDriver() throws MalformedURLException {
         String remoteUrl = gridUrl;
         RemoteWebDriver driver = null;
         if (browser.isBlank()) {
-            remoteUrl = defaultBrowser;
             ChromeOptions chromeOptions = new ChromeOptions();
             driver = new RemoteWebDriver(new URL(remoteUrl), chromeOptions);
             driver.setFileDetector(new LocalFileDetector());
@@ -143,89 +129,52 @@ public final class Driver {
         if (driver != null) {
             maxWindow(driver);
         }
+        return driver;
     }
 
     /**
      * Method to do the initial setup of local WebDriver
+     *
+     * @return
      * @throws Exception
      */
     private static WebDriver createLocalDriver() throws Exception {
+        WebDriver driver = null;
         if (driverPool.get() == null) {
             switch (browser.toLowerCase()) {
-                case "chrome":
-                    WebDriverManager.chromedriver().setup();
-                    ChromeOptions chromeOptions = new ChromeOptions();
-                    driverPool.set(new ChromeDriver(chromeOptions));
-                    break;
                 case "firefox":
                     WebDriverManager.firefoxdriver().setup();
                     FirefoxOptions firefoxOptions = new FirefoxOptions();
-                    driverPool.set(new FirefoxDriver(firefoxOptions));
+                    driver = new FirefoxDriver(firefoxOptions);
                     break;
                 case "safari":
                     WebDriverManager.safaridriver().setup();
                     SafariOptions safariOptions = new SafariOptions();
-                    driverPool.set(new SafariDriver(safariOptions));
+                    driver = new SafariDriver(safariOptions);
                     break;
                 case "edge":
                     WebDriverManager.edgedriver().setup();
                     EdgeOptions edgeOptions = new EdgeOptions();
-                    driverPool.set(new EdgeDriver(edgeOptions));
+                    driver = new EdgeDriver(edgeOptions);
                     break;
                 case "opera":
                     WebDriverManager.operadriver().setup();
                     OperaOptions operaOptions = new OperaOptions();
-                    driverPool.set(new OperaDriver(operaOptions));
+                    driver = new OperaDriver(operaOptions);
                     break;
                 case "chromeheadless":
                     WebDriverManager.chromedriver().setup();
-                    driverPool.set(new ChromeDriver(new ChromeOptions().setHeadless(true)));
+                    driver = new ChromeDriver(new ChromeOptions().setHeadless(true));
                     break;
+                default:
+                    WebDriverManager.chromedriver().setup();
+                    ChromeOptions chromeOptions = new ChromeOptions();
+                    driver = new ChromeDriver(chromeOptions);
             }
-            maxWindow(driverPool.get());
+            maxWindow(driver);
         }
-        return driverPool.get();
+        return driver;
     }
-
-//    private static WebDriver createChromeDriver() throws MalformedURLException {
-//        return enableGrid ? createRemoteChromeDriver() : createLocalChromeDriver();
-//    }
-//
-//    private static WebDriver createFirefoxDriver() throws MalformedURLException {
-//        return enableGrid ? createRemoteFirefoxDriver() : createLocalFirefoxDriver();
-//    }
-//
-//    private static WebDriver createLocalChromeDriver() {
-//        WebDriverManager.chromedriver().setup();
-//        ChromeOptions chromeOptions = new ChromeOptions();
-//        WebDriver driver = new ChromeDriver(chromeOptions);
-//        maxWindow(driver);
-//        return driver;
-//    }
-//
-//    private static WebDriver createLocalFirefoxDriver() {
-//        WebDriverManager.firefoxdriver().setup();
-//        FirefoxOptions fireFoxOptions = new FirefoxOptions();
-//        WebDriver driver = new FirefoxDriver(fireFoxOptions);
-//        maxWindow(driver);
-//        return driver;
-//    }
-//
-//    private static WebDriver createRemoteChromeDriver() throws MalformedURLException {
-//        ChromeOptions chromeOptions = new ChromeOptions();
-//        RemoteWebDriver driver = new RemoteWebDriver(new URL(gridUrl), chromeOptions);
-//        maxWindow(driver);
-//        driver.setFileDetector(new LocalFileDetector());
-//        return driver;
-//    }
-//
-//    private static WebDriver createRemoteFirefoxDriver() throws MalformedURLException {
-//        FirefoxOptions fireFoxOptions = new FirefoxOptions();
-//        RemoteWebDriver driver = new RemoteWebDriver(new URL(gridUrl), fireFoxOptions);
-//        maxWindow(driver);
-//        driver.setFileDetector(new LocalFileDetector());
-//        return driver;
-//    }
 
     /**
      * Method to return driver
