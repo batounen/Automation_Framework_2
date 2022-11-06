@@ -10,9 +10,11 @@ import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.opera.OperaDriver;
 import org.openqa.selenium.opera.OperaOptions;
 import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.safari.SafariDriver;
 import org.openqa.selenium.safari.SafariOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
@@ -30,38 +32,29 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-
 public final class Driver {
 
-    private static final ThreadLocal<WebDriver> DRIVER_POOL = new ThreadLocal<>();
-    private static final Properties PROPERTIES = new Properties();
-    private static final String BROWSER = getProperty("test.browser");
-    private static final int DEFAULT_WAIT_TIME = Integer.parseInt(getProperty("default.wait.time"));
-    private static final String DEFAULT_BROWSER = getProperty("test.browser.default");
-    private static final boolean ENABLE_GRID = Boolean.parseBoolean(getProperty("test.grid.enable"));
-    private static final String GRID_URL = getProperty("test.grid.hub.url");
+    private static final ThreadLocal<WebDriver> driverPool = new ThreadLocal<>();
+    private static final Properties properties = new Properties();
+    private static final String browser;
+    private static final String defaultBrowser;
+    private static final int defaultWaitTime;
+    private static final boolean enableGrid;
+    private static final String gridUrl;
 
     static {
         try {
             FileInputStream file = new FileInputStream("config.properties");
-            PROPERTIES.load(file);
+            properties.load(file);
             file.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    /**
-     * Method to load information from .properties file
-     */
-    public static void loadProperties(String fileName) {
-        try {
-            FileInputStream file = new FileInputStream(fileName);
-            PROPERTIES.load(file);
-            file.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        defaultBrowser = getProperty("browserDefault").toLowerCase();
+        defaultWaitTime = Integer.parseInt(getProperty("defaultWaitTime"));
+        browser = getProperty("browser");
+        enableGrid = Boolean.parseBoolean(getProperty("gridEnable").toLowerCase());
+        gridUrl = getProperty("gridHubUrl");
     }
 
     /**
@@ -71,114 +64,177 @@ public final class Driver {
     }
 
     /**
-     * Method to load .properties file to Properties object
+     * Method to return value for given key from .properties file
+     *
+     * @param key
+     * @return
      */
-    public static void readDataFromProperties(String fileName) {
-        try {
-            FileInputStream file = new FileInputStream(fileName);
-            PROPERTIES.load(file);
-            file.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public static String getProperty(String key) {
+        return properties.getProperty(key);
     }
 
     /**
-     * Method to return value for given key from .properties file
+     * Method to create WebDriver object
+     *
+     * @throws Exception
      */
-    public static String getProperty(String key) {
-        return PROPERTIES.getProperty(key);
-    }
-
-
-    public static WebDriver createDriver() throws Exception {
-        return ENABLE_GRID ? createRemoteDriver() : createLocalDriver();
+//    public static void createDriver() throws Exception {
+//        switch (browser.toLowerCase()) {
+//            case "chrome":
+//                driverPool.set(createChromeDriver());
+//                break;
+//            case "firefox":
+//                driverPool.set(createFirefoxDriver());
+//                break;
+//            default:
+//                throw new Exception("Unknown browser type entered.");
+//        }
+//    }
+    public static void createDriver() throws Exception {
+        if (enableGrid) {
+            createRemoteDriver();
+        } else {
+            createLocalDriver();
+        }
     }
 
     /**
      * Method to do the initial setup of remote WebDriver
+     *
+     * @throws MalformedURLException
      */
-    private static WebDriver createRemoteDriver() throws MalformedURLException {
-        String remoteUrl = GRID_URL;
-        RemoteWebDriver webDriver = null;
-        if (BROWSER.isBlank()) {
-            remoteUrl = DEFAULT_BROWSER;
+    private static void createRemoteDriver() throws MalformedURLException {
+        String remoteUrl = gridUrl;
+        RemoteWebDriver driver = null;
+        if (browser.isBlank()) {
+            remoteUrl = defaultBrowser;
             ChromeOptions chromeOptions = new ChromeOptions();
-            webDriver = new RemoteWebDriver(new URL(remoteUrl), chromeOptions);
-            webDriver.setFileDetector(new LocalFileDetector());
+            driver = new RemoteWebDriver(new URL(remoteUrl), chromeOptions);
+            driver.setFileDetector(new LocalFileDetector());
         } else {
-            switch (BROWSER.toLowerCase()) {
+            switch (browser) {
                 case "chrome":
                     ChromeOptions chromeOptions = new ChromeOptions();
-                    webDriver = new RemoteWebDriver(new URL(remoteUrl), chromeOptions);
-                    webDriver.setFileDetector(new LocalFileDetector());
+                    driver = new RemoteWebDriver(new URL(remoteUrl), chromeOptions);
+                    driver.setFileDetector(new LocalFileDetector());
                     break;
                 case "firefox":
                     FirefoxOptions fireFoxOptions = new FirefoxOptions();
-                    webDriver = new RemoteWebDriver(new URL(remoteUrl), fireFoxOptions);
-                    webDriver.setFileDetector(new LocalFileDetector());
+                    driver = new RemoteWebDriver(new URL(remoteUrl), fireFoxOptions);
+                    driver.setFileDetector(new LocalFileDetector());
                     break;
                 case "safari":
                     SafariOptions safariOptions = new SafariOptions();
-                    webDriver = new RemoteWebDriver(new URL(remoteUrl), safariOptions);
-                    webDriver.setFileDetector(new LocalFileDetector());
+                    driver = new RemoteWebDriver(new URL(remoteUrl), safariOptions);
+                    driver.setFileDetector(new LocalFileDetector());
                     break;
                 case "edge":
                     EdgeOptions edgeOptions = new EdgeOptions();
-                    webDriver = new RemoteWebDriver(new URL(remoteUrl), edgeOptions);
-                    webDriver.setFileDetector(new LocalFileDetector());
+                    driver = new RemoteWebDriver(new URL(remoteUrl), edgeOptions);
+                    driver.setFileDetector(new LocalFileDetector());
                     break;
                 case "opera":
                     OperaOptions operaOptions = new OperaOptions();
-                    webDriver = new RemoteWebDriver(new URL(remoteUrl), operaOptions);
-                    webDriver.setFileDetector(new LocalFileDetector());
+                    driver = new RemoteWebDriver(new URL(remoteUrl), operaOptions);
+                    driver.setFileDetector(new LocalFileDetector());
                     break;
-
             }
         }
-        if (webDriver != null) {
-            maxWindow(webDriver);
+        if (driver != null) {
+            maxWindow(driver);
         }
-        return webDriver;
     }
 
     /**
      * Method to do the initial setup of local WebDriver
+     * @throws Exception
      */
     private static WebDriver createLocalDriver() throws Exception {
-        if (DRIVER_POOL.get() == null) {
-            switch (BROWSER.toLowerCase()) {
+        if (driverPool.get() == null) {
+            switch (browser.toLowerCase()) {
                 case "chrome":
-                    DRIVER_POOL.set(WebDriverManager.chromedriver().create());
+                    WebDriverManager.chromedriver().setup();
+                    ChromeOptions chromeOptions = new ChromeOptions();
+                    driverPool.set(new ChromeDriver(chromeOptions));
                     break;
                 case "firefox":
-                    DRIVER_POOL.set(WebDriverManager.firefoxdriver().create());
+                    WebDriverManager.firefoxdriver().setup();
+                    FirefoxOptions firefoxOptions = new FirefoxOptions();
+                    driverPool.set(new FirefoxDriver(firefoxOptions));
                     break;
                 case "safari":
-                    DRIVER_POOL.set(WebDriverManager.safaridriver().create());
+                    WebDriverManager.safaridriver().setup();
+                    SafariOptions safariOptions = new SafariOptions();
+                    driverPool.set(new SafariDriver(safariOptions));
                     break;
                 case "edge":
-                    DRIVER_POOL.set(WebDriverManager.edgedriver().create());
+                    WebDriverManager.edgedriver().setup();
+                    EdgeOptions edgeOptions = new EdgeOptions();
+                    driverPool.set(new EdgeDriver(edgeOptions));
                     break;
                 case "opera":
-                    DRIVER_POOL.set(WebDriverManager.operadriver().create());
+                    WebDriverManager.operadriver().setup();
+                    OperaOptions operaOptions = new OperaOptions();
+                    driverPool.set(new OperaDriver(operaOptions));
                     break;
                 case "chromeheadless":
                     WebDriverManager.chromedriver().setup();
-                    DRIVER_POOL.set(new ChromeDriver(new ChromeOptions().setHeadless(true)));
+                    driverPool.set(new ChromeDriver(new ChromeOptions().setHeadless(true)));
                     break;
             }
-            maxWindow(DRIVER_POOL.get());
+            maxWindow(driverPool.get());
         }
-        return DRIVER_POOL.get();
+        return driverPool.get();
     }
+
+//    private static WebDriver createChromeDriver() throws MalformedURLException {
+//        return enableGrid ? createRemoteChromeDriver() : createLocalChromeDriver();
+//    }
+//
+//    private static WebDriver createFirefoxDriver() throws MalformedURLException {
+//        return enableGrid ? createRemoteFirefoxDriver() : createLocalFirefoxDriver();
+//    }
+//
+//    private static WebDriver createLocalChromeDriver() {
+//        WebDriverManager.chromedriver().setup();
+//        ChromeOptions chromeOptions = new ChromeOptions();
+//        WebDriver driver = new ChromeDriver(chromeOptions);
+//        maxWindow(driver);
+//        return driver;
+//    }
+//
+//    private static WebDriver createLocalFirefoxDriver() {
+//        WebDriverManager.firefoxdriver().setup();
+//        FirefoxOptions fireFoxOptions = new FirefoxOptions();
+//        WebDriver driver = new FirefoxDriver(fireFoxOptions);
+//        maxWindow(driver);
+//        return driver;
+//    }
+//
+//    private static WebDriver createRemoteChromeDriver() throws MalformedURLException {
+//        ChromeOptions chromeOptions = new ChromeOptions();
+//        RemoteWebDriver driver = new RemoteWebDriver(new URL(gridUrl), chromeOptions);
+//        maxWindow(driver);
+//        driver.setFileDetector(new LocalFileDetector());
+//        return driver;
+//    }
+//
+//    private static WebDriver createRemoteFirefoxDriver() throws MalformedURLException {
+//        FirefoxOptions fireFoxOptions = new FirefoxOptions();
+//        RemoteWebDriver driver = new RemoteWebDriver(new URL(gridUrl), fireFoxOptions);
+//        maxWindow(driver);
+//        driver.setFileDetector(new LocalFileDetector());
+//        return driver;
+//    }
 
     /**
      * Method to return driver
+     *
+     * @return
      */
     public static WebDriver getDriver() {
-        if (DRIVER_POOL.get() != null) {
-            return DRIVER_POOL.get();
+        if (driverPool.get() != null) {
+            return driverPool.get();
         } else {
             throw new RuntimeException("Webdriver is null.");
         }
@@ -186,6 +242,7 @@ public final class Driver {
 
     /**
      * Method to do maximize the browser window
+     * @param driver
      */
     private static void maxWindow(WebDriver driver) {
         driver.manage().window().maximize();
@@ -193,6 +250,7 @@ public final class Driver {
 
     /**
      * Method to read data from Excel file and return Object[][]
+     * @return
      */
     public static Object[][] readXLSX() {
         Object[][] testData = null;
@@ -219,6 +277,8 @@ public final class Driver {
 
     /**
      * Method that accepts sheet name as an argument to read data from Excel file and return Object[][]
+     * @param sheetName
+     * @return
      */
     public static Object[][] readXLSX(String sheetName) {
         Object[][] testData = null;
@@ -245,6 +305,9 @@ public final class Driver {
 
     /**
      * Method that accepts File path and Sheet name as arguments to read data from Excel file and return Object[][]
+     * @param filePath
+     * @param sheetName
+     * @return
      */
     public static Object[][] readXLSX(String filePath, String sheetName) {
         Object[][] testData = null;
@@ -271,6 +334,8 @@ public final class Driver {
 
     /**
      * Method to read data from CSV file and return ArrayList
+     * @param dataColumn
+     * @return
      */
     public static List<String> readCSV(int dataColumn) {
         List<String> testData = new ArrayList<>();
@@ -289,6 +354,9 @@ public final class Driver {
 
     /**
      * Method to read data from CSV file and return HashMap
+     * @param keyColumn
+     * @param valueColumn
+     * @return
      */
     public static Map<String, String> readCSV(int keyColumn, int valueColumn) {
         Map<String, String> testData = new HashMap<>();
@@ -313,7 +381,7 @@ public final class Driver {
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("mm:ss");
             LocalTime localTime = LocalTime.now();
             String minSec = dtf.format(localTime).replace(":", "");
-            File file = ((TakesScreenshot) DRIVER_POOL.get()).getScreenshotAs(OutputType.FILE);
+            File file = ((TakesScreenshot) driverPool.get()).getScreenshotAs(OutputType.FILE);
             FileUtils.copyFile(file, new File(getProperty("screenShotSavePath") + minSec + getProperty("screenShotExtension")));
             sleep(1);
         } catch (IOException e) {
@@ -329,7 +397,7 @@ public final class Driver {
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("mm:ss");
             LocalTime localTime = LocalTime.now();
             String minSec = dtf.format(localTime).replace(":", "");
-            Screenshot ss = new AShot().takeScreenshot(DRIVER_POOL.get());
+            Screenshot ss = new AShot().takeScreenshot(driverPool.get());
             ImageIO.write(ss.getImage(), getProperty("screenShotExtension"), new File(getProperty("screenShotSavePath") + minSec));
             sleep(1);
         } catch (IOException e) {
@@ -339,13 +407,14 @@ public final class Driver {
 
     /**
      * Method to take screenshot of WebElement
+     * @param element
      */
     public static void captureElement(WebElement element) {
         try {
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("mm:ss");
             LocalTime localTime = LocalTime.now();
             String minSec = dtf.format(localTime).replace(":", "");
-            Screenshot ss = new AShot().shootingStrategy(ShootingStrategies.viewportPasting(100)).takeScreenshot(DRIVER_POOL.get(), element);
+            Screenshot ss = new AShot().shootingStrategy(ShootingStrategies.viewportPasting(100)).takeScreenshot(driverPool.get(), element);
             ImageIO.write(ss.getImage(), getProperty("screenShotExtension"), new File(getProperty("screenShotSavePath") + minSec));
             sleep(1);
         } catch (IOException e) {
@@ -355,20 +424,21 @@ public final class Driver {
 
     /**
      * Method to highlight a WebElement and take screenshot
+     * @param element
      */
     public static void captureHighlighted(WebElement element) {
         try {
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("mm:ss");
             LocalTime localTime = LocalTime.now();
             String minSec = dtf.format(localTime).replace(":", "");
-            JavascriptExecutor jse = (JavascriptExecutor) DRIVER_POOL.get();
+            JavascriptExecutor jse = (JavascriptExecutor) driverPool.get();
             if (getProperty("needBackground").equalsIgnoreCase("yes")) {
                 jse.executeScript("arguments[0].setAttribute('style', 'border:" + getProperty("highlightBorderSize") + "px solid " + getProperty("highlightBorderColor") + "; background:" + getProperty("backgroundColor") + "')", element);
             } else if (getProperty("needBackground").equalsIgnoreCase("no")) {
                 jse.executeScript("arguments[0].style.border='" + getProperty("highlightBorderSize") + "px solid " + getProperty("highlightBorderColor") + "'", element);
             }
             sleep(1);
-            File file = ((TakesScreenshot) DRIVER_POOL.get()).getScreenshotAs(OutputType.FILE);
+            File file = ((TakesScreenshot) driverPool.get()).getScreenshotAs(OutputType.FILE);
             FileUtils.copyFile(file, new File(getProperty("screenShotSavePath") + minSec + getProperty("screenShotExtension")), true);
             sleep(1);
         } catch (IOException e) {
@@ -378,13 +448,16 @@ public final class Driver {
 
     /**
      * Method to verify the Title of the page
+     * @param expected
+     * @return
      */
     public static boolean verifyTitle(String expected) {
-        return DRIVER_POOL.get().getTitle().equals(expected);
+        return driverPool.get().getTitle().equals(expected);
     }
 
     /**
      * Method to select all options
+     * @param dropDown
      */
     public static void selectAll(Select dropDown) {
         for (WebElement each : dropDown.getOptions()) {
@@ -396,38 +469,42 @@ public final class Driver {
      * Method to adjust implicit wait time
      */
     public static void waitImplicit() {
-        DRIVER_POOL.get().manage().timeouts().implicitlyWait(DEFAULT_WAIT_TIME, TimeUnit.SECONDS);
+        driverPool.get().manage().timeouts().implicitlyWait(defaultWaitTime, TimeUnit.SECONDS);
     }
 
     /**
      * Method to wait explicitly until the Title loads
+     * @param expectedTitle
      */
     public static void waitForTitle(String expectedTitle) {
-        WebDriverWait wait = new WebDriverWait(Driver.getDriver(), DEFAULT_WAIT_TIME);
+        WebDriverWait wait = new WebDriverWait(Driver.getDriver(), defaultWaitTime);
         wait.until(ExpectedConditions.titleIs(expectedTitle));
     }
 
     /**
      * Method to wait explicitly until the WebElement is visible
+     * @param element
      */
     public static void waitUntilVisible(WebElement element) {
-        WebDriverWait wait = new WebDriverWait(Driver.getDriver(), DEFAULT_WAIT_TIME);
+        WebDriverWait wait = new WebDriverWait(Driver.getDriver(), defaultWaitTime);
         wait.until(ExpectedConditions.visibilityOf(element));
     }
 
     /**
      * Method to wait explicitly until the WebElement is invisible
+     * @param element
      */
     public static void waitUntilInvisible(WebElement element) {
-        WebDriverWait wait = new WebDriverWait(Driver.getDriver(), DEFAULT_WAIT_TIME);
+        WebDriverWait wait = new WebDriverWait(Driver.getDriver(), defaultWaitTime);
         wait.until(ExpectedConditions.invisibilityOf(element));
     }
 
     /**
      * Method to wait explicitly until the WebElement is clickable
+     * @param element
      */
     public static void waitUntilClickable(WebElement element) {
-        WebDriverWait wait = new WebDriverWait(Driver.getDriver(), DEFAULT_WAIT_TIME);
+        WebDriverWait wait = new WebDriverWait(Driver.getDriver(), defaultWaitTime);
         wait.until(ExpectedConditions.elementToBeClickable(element));
     }
 
@@ -451,11 +528,12 @@ public final class Driver {
      * Method to adjust implicit wait time
      */
     public static void waitPageLoadDefaultTime() {
-        DRIVER_POOL.get().manage().timeouts().pageLoadTimeout(DEFAULT_WAIT_TIME, TimeUnit.SECONDS);
+        driverPool.get().manage().timeouts().pageLoadTimeout(defaultWaitTime, TimeUnit.SECONDS);
     }
 
     /**
      * Method to adjust thread sleep time
+     * @param seconds
      */
     public static void sleep(int seconds) {
         try {
@@ -476,8 +554,8 @@ public final class Driver {
      * Method to terminate the WebDriver instance
      */
     public static void quitDriver() {
-        if (DRIVER_POOL.get() != null) {
-            DRIVER_POOL.get().quit();
+        if (driverPool.get() != null) {
+            driverPool.get().quit();
         }
     }
 
@@ -485,24 +563,17 @@ public final class Driver {
      * Method to remove value from ThreadLocal
      */
     public static void removeDriver() {
-        if (DRIVER_POOL.get() != null) {
-            DRIVER_POOL.remove();
+        if (driverPool.get() != null) {
+            driverPool.remove();
         }
-    }
-
-    public static void cleanUpDriver() {
-        quitDriver();
-        removeDriver();
     }
 
     /**
      * Method to kill session after test
      */
-    public static void closeDriver() {
-        if (DRIVER_POOL.get() != null) {
-            DRIVER_POOL.get().quit();
-            DRIVER_POOL.remove();
-        }
+    public static void cleanUpDriver() {
+        quitDriver();
+        removeDriver();
     }
 
 }
