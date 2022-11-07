@@ -32,6 +32,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import static org.junit.Assert.assertEquals;
+
 public final class Driver {
 
     private static final ThreadLocal<WebDriver> driverPool = new ThreadLocal<>();
@@ -52,7 +54,7 @@ public final class Driver {
         }
         defaultBrowser = getProperty("browserDefault").toLowerCase();
         defaultWaitTime = Integer.parseInt(getProperty("defaultWaitTime"));
-        browser = getProperty("browser");
+        browser = getProperty("browser").toLowerCase();
         enableGrid = Boolean.parseBoolean(getProperty("gridEnable").toLowerCase());
         gridUrl = getProperty("gridHubUrl");
     }
@@ -67,7 +69,7 @@ public final class Driver {
      * Method to return value for given key from .properties file
      *
      * @param key
-     * @return
+     * @return String
      */
     public static String getProperty(String key) {
         return properties.getProperty(key);
@@ -135,7 +137,7 @@ public final class Driver {
     /**
      * Method to do the initial setup of local WebDriver
      *
-     * @return
+     * @return WebDriver
      * @throws Exception
      */
     private static WebDriver createLocalDriver() throws Exception {
@@ -179,7 +181,7 @@ public final class Driver {
     /**
      * Method to return driver
      *
-     * @return
+     * @return WebDriver
      */
     public static WebDriver getDriver() {
         if (driverPool.get() != null) {
@@ -199,7 +201,7 @@ public final class Driver {
 
     /**
      * Method to read data from Excel file and return Object[][]
-     * @return
+     * @return Object[][]
      */
     public static Object[][] readXLSX() {
         Object[][] testData = null;
@@ -227,7 +229,7 @@ public final class Driver {
     /**
      * Method that accepts sheet name as an argument to read data from Excel file and return Object[][]
      * @param sheetName
-     * @return
+     * @return Object[][]
      */
     public static Object[][] readXLSX(String sheetName) {
         Object[][] testData = null;
@@ -256,7 +258,7 @@ public final class Driver {
      * Method that accepts File path and Sheet name as arguments to read data from Excel file and return Object[][]
      * @param filePath
      * @param sheetName
-     * @return
+     * @return Object[][]
      */
     public static Object[][] readXLSX(String filePath, String sheetName) {
         Object[][] testData = null;
@@ -284,7 +286,7 @@ public final class Driver {
     /**
      * Method to read data from CSV file and return ArrayList
      * @param dataColumn
-     * @return
+     * @return List<String>
      */
     public static List<String> readCSV(int dataColumn) {
         List<String> testData = new ArrayList<>();
@@ -305,7 +307,7 @@ public final class Driver {
      * Method to read data from CSV file and return HashMap
      * @param keyColumn
      * @param valueColumn
-     * @return
+     * @return Map
      */
     public static Map<String, String> readCSV(int keyColumn, int valueColumn) {
         Map<String, String> testData = new HashMap<>();
@@ -398,10 +400,9 @@ public final class Driver {
     /**
      * Method to verify the Title of the page
      * @param expected
-     * @return
      */
-    public static boolean verifyTitle(String expected) {
-        return driverPool.get().getTitle().equals(expected);
+    public static void verifyTitle(String expected) {
+        assertEquals(expected, getDriver().getTitle());
     }
 
     /**
