@@ -1,18 +1,13 @@
 package com.example.utils;
 
-
-import org.junit.After;
-import org.junit.Before;
+import com.example.pages.Dashboard;
+import com.example.pages.Login;
 
 public class TestBase {
 
-    @Before
-    public void setup() throws Exception {
-        Driver.createDriver();
-    }
+    public Login login;
+    public Dashboard dashboard;
 
-    @After
-    public void tearDown() {
-        Driver.cleanUpDriver();
-    }
+
+
 }
