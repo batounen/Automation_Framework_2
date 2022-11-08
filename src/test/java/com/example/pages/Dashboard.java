@@ -44,6 +44,7 @@ public class Dashboard {
                 break;
             }
         }
+        Driver.sleep(2);
     }
 
 }
