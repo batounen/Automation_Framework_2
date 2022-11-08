@@ -1,7 +1,6 @@
 package com.example.pages;
 
 import com.example.utils.Driver;
-import com.example.utils.TestBase;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
