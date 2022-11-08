@@ -8,7 +8,7 @@ import org.openqa.selenium.support.PageFactory;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class Login extends TestBase {
+public class Login {
 
     public Login() {
         PageFactory.initElements(Driver.getDriver(), this);
