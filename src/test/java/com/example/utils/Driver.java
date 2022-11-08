@@ -38,7 +38,7 @@ public final class Driver {
 
     private static final ThreadLocal<WebDriver> driverPool = new ThreadLocal<>();
     private static final Properties properties = new Properties();
-    private static final String browser;
+    private static String browser;
     private static final String defaultBrowser;
     private static final int defaultWaitTime;
     private static final boolean enableGrid;
@@ -94,44 +94,45 @@ public final class Driver {
      */
     private static WebDriver createRemoteDriver() throws MalformedURLException {
         String remoteUrl = gridUrl;
-        RemoteWebDriver driver = null;
+        RemoteWebDriver remoteWebDriver = null;
         if (browser.isBlank()) {
-            ChromeOptions chromeOptions = new ChromeOptions();
-            driver = new RemoteWebDriver(new URL(remoteUrl), chromeOptions);
-            driver.setFileDetector(new LocalFileDetector());
+//            ChromeOptions chromeOptions = new ChromeOptions();
+//            remoteWebDriver = new RemoteWebDriver(new URL(remoteUrl), chromeOptions);
+//            remoteWebDriver.setFileDetector(new LocalFileDetector());
+            browser = defaultBrowser;
         } else {
             switch (browser) {
                 case "chrome":
                     ChromeOptions chromeOptions = new ChromeOptions();
-                    driver = new RemoteWebDriver(new URL(remoteUrl), chromeOptions);
-                    driver.setFileDetector(new LocalFileDetector());
+                    remoteWebDriver = new RemoteWebDriver(new URL(remoteUrl), chromeOptions);
+                    remoteWebDriver.setFileDetector(new LocalFileDetector());
                     break;
                 case "firefox":
                     FirefoxOptions fireFoxOptions = new FirefoxOptions();
-                    driver = new RemoteWebDriver(new URL(remoteUrl), fireFoxOptions);
-                    driver.setFileDetector(new LocalFileDetector());
+                    remoteWebDriver = new RemoteWebDriver(new URL(remoteUrl), fireFoxOptions);
+                    remoteWebDriver.setFileDetector(new LocalFileDetector());
                     break;
                 case "safari":
                     SafariOptions safariOptions = new SafariOptions();
-                    driver = new RemoteWebDriver(new URL(remoteUrl), safariOptions);
-                    driver.setFileDetector(new LocalFileDetector());
+                    remoteWebDriver = new RemoteWebDriver(new URL(remoteUrl), safariOptions);
+                    remoteWebDriver.setFileDetector(new LocalFileDetector());
                     break;
                 case "edge":
                     EdgeOptions edgeOptions = new EdgeOptions();
-                    driver = new RemoteWebDriver(new URL(remoteUrl), edgeOptions);
-                    driver.setFileDetector(new LocalFileDetector());
+                    remoteWebDriver = new RemoteWebDriver(new URL(remoteUrl), edgeOptions);
+                    remoteWebDriver.setFileDetector(new LocalFileDetector());
                     break;
                 case "opera":
                     OperaOptions operaOptions = new OperaOptions();
-                    driver = new RemoteWebDriver(new URL(remoteUrl), operaOptions);
-                    driver.setFileDetector(new LocalFileDetector());
+                    remoteWebDriver = new RemoteWebDriver(new URL(remoteUrl), operaOptions);
+                    remoteWebDriver.setFileDetector(new LocalFileDetector());
                     break;
             }
         }
-        if (driver != null) {
-            maxWindow(driver);
+        if (remoteWebDriver != null) {
+            maxWindow(remoteWebDriver);
         }
-        return driver;
+        return remoteWebDriver;
     }
 
     /**
