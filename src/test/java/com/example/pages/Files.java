@@ -99,7 +99,7 @@ public class Files {
                 break;
             } else {
                 actionsMenuClick("Remove from favorites");
-                Driver.sleep(2);
+                Driver.sleep(1);
             }
 
         }

@@ -1,5 +1,6 @@
 @us1 @smoke
 Feature: As a user, I should be able to log in.
+
   Scenario Outline: Verify login with valid credentials
     Given user on the login page
     When user use username "<username>" and passcode "<password>"
@@ -7,5 +8,4 @@ Feature: As a user, I should be able to log in.
     Then verify the user should be at the dashboard page
     Examples:
       | username | password    |
-      | user5    | Userpass123 |
-      | user35   | Userpass123 |
+      | user32   | Userpass123 |
