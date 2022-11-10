@@ -21,17 +21,17 @@ public class US6 {
 
     @When("the user clicks the add icon on the top")
     public void the_user_clicks_the_add_icon_on_the_top() {
-
+        files.uploadBtnClick();
     }
 
-    @When("users uploads file with the “upload file” option")
-    public void users_uploads_file_with_the_upload_file_option() {
-
+    @When("users uploads file with the {string} option")
+    public void users_uploads_file_with_the_upload_file_option(String command) {
+        files.uploadCommandSelector(command);
     }
 
     @Then("verify the file is displayed on the page")
     public void verify_the_file_is_displayed_on_the_page() {
-
+        files.verifyFileUpload();
     }
 
 }
