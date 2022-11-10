@@ -49,6 +49,22 @@ public class Files {
     @FindBy(css = "#emptycontent>div[class=\"icon-starred\"]")
     private WebElement noFavoritesYetStar;
 
+    @FindBy(css = ".creatable > a")
+    private WebElement uploadFileButton;
+
+    @FindAll(@FindBy(css = ".menu-left .menuitem"))
+    private List<WebElement> uploadButtonCommands;
+
+//    @FindAll(@FindBy(css = ".menu-left li span:last-of-type"))
+    @FindAll(@FindBy(css = ".displayname"))
+    private List<WebElement> uploadButtonCommandNames;
+
+    @FindBy(css = "#uploadprogressbar")
+    private WebElement uploadLoadingBar;
+
+    @FindBy(css = "#file_upload_start")
+    private WebElement hiddenUploadField;
+
     public void selectAllBoxClick() {
         selectAllBox.click();
     }
@@ -129,6 +145,36 @@ public class Files {
 
     public void verifyNoFavorites() {
         assertTrue(noFavoritesYetStar.isDisplayed());
+    }
+
+    public void uploadBtnClick() {
+        Driver.waitUntilClickable(uploadFileButton);
+        uploadFileButton.click();
+    }
+
+    public void uploadCommandSelector(String command) {
+        for (int i = 0; i < uploadButtonCommands.size(); i++) {
+            if (uploadButtonCommandNames.get(i).getText().equalsIgnoreCase(command)) {
+//                uploadButtonCommands.get(i).sendKeys(Driver.getProperty("uploadTestFile"));
+                directFileUpload();
+                break;
+            }
+        }
+    }
+
+    public void directFileUpload() {
+        hiddenUploadField.sendKeys(Driver.getProperty("uploadTestFile"));
+    }
+
+    public void verifyFileUpload() {
+        Driver.waitUntilInvisible(uploadLoadingBar);
+        String uploadedFilePath = Driver.getProperty("uploadTestFile");
+        String uploadedFileName = uploadedFilePath.substring(uploadedFilePath.lastIndexOf("/") + 1, uploadedFilePath.indexOf("."));
+        List<String> allVisibleFileNames = new ArrayList<>();
+        for (WebElement fileName : fileNames) {
+            allVisibleFileNames.add(fileName.getText());
+        }
+        assertTrue(allVisibleFileNames.contains(uploadedFileName));
     }
 
 }
