@@ -12,6 +12,7 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.opera.OperaDriver;
 import org.openqa.selenium.opera.OperaOptions;
+import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.safari.SafariDriver;
@@ -77,6 +78,7 @@ public final class Driver {
 
     /**
      * Method to create WebDriver object
+     *
      * @throws Exception
      */
     public static void createDriver() throws Exception {
@@ -94,44 +96,37 @@ public final class Driver {
      */
     private static WebDriver createRemoteDriver() throws MalformedURLException {
         String remoteUrl = gridUrl;
-        RemoteWebDriver remoteWebDriver = null;
+//        URL remoteUrl = new URL(gridUrl);
+        DesiredCapabilities desiredCapabilities;
+        WebDriver remoteWebDriver = null;
         if (browser.isBlank()) {
-//            ChromeOptions chromeOptions = new ChromeOptions();
-//            remoteWebDriver = new RemoteWebDriver(new URL(remoteUrl), chromeOptions);
-//            remoteWebDriver.setFileDetector(new LocalFileDetector());
             browser = defaultBrowser;
-        } else {
-            switch (browser) {
-                case "chrome":
-                    ChromeOptions chromeOptions = new ChromeOptions();
-                    remoteWebDriver = new RemoteWebDriver(new URL(remoteUrl), chromeOptions);
-                    remoteWebDriver.setFileDetector(new LocalFileDetector());
-                    break;
-                case "firefox":
-                    FirefoxOptions fireFoxOptions = new FirefoxOptions();
-                    remoteWebDriver = new RemoteWebDriver(new URL(remoteUrl), fireFoxOptions);
-                    remoteWebDriver.setFileDetector(new LocalFileDetector());
-                    break;
-                case "safari":
-                    SafariOptions safariOptions = new SafariOptions();
-                    remoteWebDriver = new RemoteWebDriver(new URL(remoteUrl), safariOptions);
-                    remoteWebDriver.setFileDetector(new LocalFileDetector());
-                    break;
-                case "edge":
-                    EdgeOptions edgeOptions = new EdgeOptions();
-                    remoteWebDriver = new RemoteWebDriver(new URL(remoteUrl), edgeOptions);
-                    remoteWebDriver.setFileDetector(new LocalFileDetector());
-                    break;
-                case "opera":
-                    OperaOptions operaOptions = new OperaOptions();
-                    remoteWebDriver = new RemoteWebDriver(new URL(remoteUrl), operaOptions);
-                    remoteWebDriver.setFileDetector(new LocalFileDetector());
-                    break;
-            }
         }
-        if (remoteWebDriver != null) {
-            maxWindow(remoteWebDriver);
+        switch (browser) {
+            case "firefox":
+                desiredCapabilities = new DesiredCapabilities();
+                desiredCapabilities.setBrowserName("firefox");
+                remoteWebDriver = new RemoteWebDriver(new URL(remoteUrl), desiredCapabilities);
+                break;
+            case "edge":
+                desiredCapabilities = new DesiredCapabilities();
+                desiredCapabilities.setBrowserName("edge");
+                remoteWebDriver = new RemoteWebDriver(new URL(remoteUrl), desiredCapabilities);
+                break;
+            case "safari":
+                desiredCapabilities = new DesiredCapabilities();
+                desiredCapabilities.setBrowserName("safari");
+                remoteWebDriver = new RemoteWebDriver(new URL(remoteUrl), desiredCapabilities);
+                break;
+            default:
+//                desiredCapabilities = new DesiredCapabilities();
+//                desiredCapabilities.setBrowserName("chrome");
+//                remoteWebDriver = new RemoteWebDriver(new URL(remoteUrl), desiredCapabilities);
+                ChromeOptions chromeOptions = new ChromeOptions();
+                remoteWebDriver = new RemoteWebDriver(new URL(remoteUrl), chromeOptions);
+
         }
+        maxWindow(remoteWebDriver);
         return remoteWebDriver;
     }
 
@@ -188,12 +183,13 @@ public final class Driver {
         if (driverPool.get() != null) {
             return driverPool.get();
         } else {
-            throw new RuntimeException("Webdriver is null.");
+            throw new RuntimeException("WebDriver is NULL!");
         }
     }
 
     /**
      * Method to do maximize the browser window
+     *
      * @param driver
      */
     private static void maxWindow(WebDriver driver) {
@@ -202,6 +198,7 @@ public final class Driver {
 
     /**
      * Method to read data from Excel file and return Object[][]
+     *
      * @return Object[][]
      */
     public static Object[][] readXLSX() {
@@ -229,6 +226,7 @@ public final class Driver {
 
     /**
      * Method that accepts sheet name as an argument to read data from Excel file and return Object[][]
+     *
      * @param sheetName
      * @return Object[][]
      */
@@ -257,6 +255,7 @@ public final class Driver {
 
     /**
      * Method that accepts File path and Sheet name as arguments to read data from Excel file and return Object[][]
+     *
      * @param filePath
      * @param sheetName
      * @return Object[][]
@@ -286,6 +285,7 @@ public final class Driver {
 
     /**
      * Method to read data from CSV file and return ArrayList
+     *
      * @param dataColumn
      * @return List<String>
      */
@@ -306,6 +306,7 @@ public final class Driver {
 
     /**
      * Method to read data from CSV file and return HashMap
+     *
      * @param keyColumn
      * @param valueColumn
      * @return Map
@@ -359,6 +360,7 @@ public final class Driver {
 
     /**
      * Method to take screenshot of WebElement
+     *
      * @param element
      */
     public static void captureElement(WebElement element) {
@@ -376,6 +378,7 @@ public final class Driver {
 
     /**
      * Method to highlight a WebElement and take screenshot
+     *
      * @param element
      */
     public static void captureHighlighted(WebElement element) {
@@ -400,6 +403,7 @@ public final class Driver {
 
     /**
      * Method to verify the Title of the page
+     *
      * @param expected
      */
     public static void verifyTitle(String expected) {
@@ -408,6 +412,7 @@ public final class Driver {
 
     /**
      * Method to select all options
+     *
      * @param dropDown
      */
     public static void selectAll(Select dropDown) {
@@ -425,6 +430,7 @@ public final class Driver {
 
     /**
      * Method to wait explicitly until the Title loads
+     *
      * @param expectedTitle
      */
     public static void waitForTitle(String expectedTitle) {
@@ -434,6 +440,7 @@ public final class Driver {
 
     /**
      * Method to wait explicitly until the WebElement is visible
+     *
      * @param element
      */
     public static void waitUntilVisible(WebElement element) {
@@ -443,6 +450,7 @@ public final class Driver {
 
     /**
      * Method to wait explicitly until the WebElement is invisible
+     *
      * @param element
      */
     public static void waitUntilInvisible(WebElement element) {
@@ -452,6 +460,7 @@ public final class Driver {
 
     /**
      * Method to wait explicitly until the WebElement is clickable
+     *
      * @param element
      */
     public static void waitUntilClickable(WebElement element) {
@@ -484,6 +493,7 @@ public final class Driver {
 
     /**
      * Method to adjust thread sleep time
+     *
      * @param seconds
      */
     public static void sleep(int seconds) {
