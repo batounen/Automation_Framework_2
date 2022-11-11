@@ -9,10 +9,12 @@ import org.openqa.selenium.support.PageFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class Files {
+
+    private final String newFolderName = "TestFolder" + (int) (Math.random() * 100000);
+    private String deletedFileName;
 
     public Files() {
         PageFactory.initElements(Driver.getDriver(), this);
@@ -55,7 +57,6 @@ public class Files {
     @FindAll(@FindBy(css = ".menu-left .menuitem"))
     private List<WebElement> uploadButtonCommands;
 
-//    @FindAll(@FindBy(css = ".menu-left li span:last-of-type"))
     @FindAll(@FindBy(css = ".displayname"))
     private List<WebElement> uploadButtonCommandNames;
 
@@ -64,6 +65,24 @@ public class Files {
 
     @FindBy(css = "#file_upload_start")
     private WebElement hiddenUploadField;
+
+    @FindBy(css = "input[class='icon-confirm'][type='submit']")
+    private WebElement newFolderNameSubmit;
+
+    @FindBy(css = "#view13-input-folder")
+    private WebElement newFolderNameInput;
+
+    @FindBy(css = ".show .tooltip-inner")
+    private WebElement folderAlreadyExistMsg;
+
+    @FindAll(@FindBy(css = "#fileList tr .thumbnail"))
+    private List<WebElement> allFileIcons;
+
+    @FindAll(@FindBy(css = "#content #app-navigation li a"))
+    private List<WebElement> appNavigation;
+
+    @FindAll(@FindBy(css = ".extra-data .innernametext"))
+    private List<WebElement> deletedFiles;
 
     public void selectAllBoxClick() {
         selectAllBox.click();
@@ -138,6 +157,10 @@ public class Files {
             if (!actionsCommandNames.get(i).getText().isBlank()) {
                 if (actionsCommandNames.get(i).getText().strip().equals(command)) {
                     actionsCommandButtons.get(i).click();
+                    break;
+                } else if (actionsCommandNames.get(i).getText().contains("Delete")) {
+                    actionsCommandButtons.get(i).click();
+                    break;
                 }
             }
         }
@@ -154,10 +177,18 @@ public class Files {
 
     public void uploadCommandSelector(String command) {
         for (int i = 0; i < uploadButtonCommands.size(); i++) {
-            if (uploadButtonCommandNames.get(i).getText().equalsIgnoreCase(command)) {
-//                uploadButtonCommands.get(i).sendKeys(Driver.getProperty("uploadTestFile"));
+            if (uploadButtonCommandNames.get(i).getText().equalsIgnoreCase(command) && command.equalsIgnoreCase("upload file")) {
                 directFileUpload();
                 break;
+            } else if (uploadButtonCommandNames.get(i).getText().equalsIgnoreCase(command) && command.equalsIgnoreCase("new folder")) {
+                uploadButtonCommands.get(i).click();
+                newFolderNameInput.clear();
+                newFolderNameInput.sendKeys(newFolderName);
+//                if (folderAlreadyExistMsg.isDisplayed()) {
+//                    newFolderNameInput.clear();
+//                    newFolderName = newFolderName.substring(0,newFolderName.length()-3);
+//                    newFolderNameInput.sendKeys(newFolderName);
+//                }
             }
         }
     }
@@ -174,7 +205,58 @@ public class Files {
         for (WebElement fileName : fileNames) {
             allVisibleFileNames.add(fileName.getText());
         }
+        System.out.println(allVisibleFileNames);
+        System.out.println(uploadedFileName);
         assertTrue(allVisibleFileNames.contains(uploadedFileName));
+    }
+
+    public void newFolderNameSubmit() {
+        Driver.waitUntilClickable(newFolderNameSubmit);
+        newFolderNameSubmit.click();
+    }
+
+    public void verifyNewFolder() {
+        Driver.getDriver().navigate().refresh();
+        Driver.waitUntilClickable(uploadFileButton);
+        List<String> allVisibleFileNames = new ArrayList<>();
+        for (WebElement fileName : fileNames) {
+            allVisibleFileNames.add(fileName.getText());
+        }
+        System.out.println("allVisibleFileNames = " + allVisibleFileNames);
+        System.out.println("newFolderName = " + newFolderName);
+        assertTrue(allVisibleFileNames.contains(newFolderName));
+    }
+
+    public void folderSelect() {
+        for (int i = 0; i < allFileIcons.size(); i++) {
+            if (allFileIcons.get(i).getAttribute("style").contains("filetypes/folder")) {
+                fileNames.get(i).click();
+                break;
+            }
+        }
+    }
+
+    public void randomActionDotsClick() {
+        int min = 0, max = actionDots.size();
+        int randomNum = (int) ((Math.random() * (max - min)) + min);
+        actionDots.get(randomNum).click();
+    }
+
+    public void appNavigation(String module) {
+        for (WebElement eachModule : appNavigation) {
+            if (eachModule.getText().strip().equalsIgnoreCase(module)) {
+                eachModule.click();
+            }
+        }
+    }
+
+    public void verifyDeletedFile() {
+        String deletedFileName = "";
+        List<String> deletedFileNames = new ArrayList<>();
+        for (WebElement eachFile : this.deletedFiles) {
+            deletedFileNames.add(eachFile.getText());
+        }
+        assertTrue(deletedFileNames.contains(deletedFileName));
     }
 
 }
