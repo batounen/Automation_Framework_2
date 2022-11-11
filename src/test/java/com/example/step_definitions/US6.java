@@ -33,5 +33,4 @@ public class US6 {
     public void verify_the_file_is_displayed_on_the_page() {
         files.verifyFileUpload();
     }
-
 }
