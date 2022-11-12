@@ -13,8 +13,13 @@ import static org.junit.Assert.assertTrue;
 
 public class Files {
 
-    private final String newFolderName = "TestFolder" + (int) (Math.random() * 100000);
-    private String deletedFileName;
+    private final String newFolderName = "TestFolder" + Driver.randomNumberGenerator(0, 1000);
+    private String randomlySelectedFileName;
+    private int randomNumFiles;
+    private String comment;
+
+    private double storageBeforeUpload;
+    private double storageAfterUpload;
 
     public Files() {
         PageFactory.initElements(Driver.getDriver(), this);
@@ -83,6 +88,54 @@ public class Files {
 
     @FindAll(@FindBy(css = ".extra-data .innernametext"))
     private List<WebElement> deletedFiles;
+
+    @FindBy(css = "a[id='commentsTabView']")
+    private WebElement commentsSection;
+
+    @FindBy(css = "div[data-placeholder='New comment …']")
+    private WebElement newCommentInput;
+
+    @FindBy(css = "input[class$='has-tooltip']")
+    private WebElement commentSubmitBtn;
+
+    @FindAll(@FindBy(css = "li[class='comment'] div[class='message']"))
+    private List<WebElement> allPostedComments;
+
+    @FindAll(@FindBy(css = "div[id='app-settings-content'] label[for$='Toggle']"))
+    private List<WebElement> settingsCommands;
+
+    @FindAll(@FindBy(css = "#app-settings-content input[type='checkbox']"))
+    private List<WebElement> settingsCheckBoxes;
+
+    @FindBy(css = "#app-settings-header > button")
+    private WebElement settingsBtn;
+
+    @FindBy(css = "div[id='editor-container']")
+    private WebElement richWorkspace;
+
+    @FindBy(css = "div[id='recommendations']")
+    private WebElement recommendations;
+
+    @FindBy(css = "#app-content-files")
+    private WebElement pageContents;
+
+    @FindBy(css = "#content #app-navigation li a p")
+    private WebElement currentStorageSize;
+
+    @FindBy(css = "#oc-dialog-fileexists-content")
+    private WebElement fileUploadConflictAlert;
+
+    @FindBy(css = "#checkbox_original_0")
+    private WebElement originalFileCheckbox;
+
+    @FindBy(css = "#checkbox_replacement_0")
+    private WebElement newFileCheckbox;
+
+    @FindBy(css = ".continue")
+    private WebElement continueBtn;
+
+    @FindAll(@FindBy(css = "tr th input[type='checkbox'][id^='checkbox']"))
+    private List<WebElement> conflictCheckboxes;
 
     public void selectAllBoxClick() {
         selectAllBox.click();
@@ -195,10 +248,16 @@ public class Files {
 
     public void directFileUpload() {
         hiddenUploadField.sendKeys(Driver.getProperty("uploadTestFile"));
+        Driver.sleep(1);
+//        if (fileUploadConflictAlert.isDisplayed()) {
+//            newFileCheckbox.click();
+//            originalFileCheckbox.click();
+//            continueBtn.click();
+//        }
+        Driver.waitUntilInvisible(uploadLoadingBar);
     }
 
     public void verifyFileUpload() {
-        Driver.waitUntilInvisible(uploadLoadingBar);
         String uploadedFilePath = Driver.getProperty("uploadTestFile");
         String uploadedFileName = uploadedFilePath.substring(uploadedFilePath.lastIndexOf("/") + 1, uploadedFilePath.indexOf("."));
         List<String> allVisibleFileNames = new ArrayList<>();
@@ -237,9 +296,9 @@ public class Files {
     }
 
     public void randomActionDotsClick() {
-        int min = 0, max = actionDots.size();
-        int randomNum = (int) ((Math.random() * (max - min)) + min);
-        actionDots.get(randomNum).click();
+        randomNumFiles = Driver.randomNumberGenerator(0, actionDots.size());
+        randomlySelectedFileName = fileNames.get(randomNumFiles).getText();
+        actionDots.get(randomNumFiles).click();
     }
 
     public void appNavigation(String module) {
@@ -251,12 +310,94 @@ public class Files {
     }
 
     public void verifyDeletedFile() {
-        String deletedFileName = "";
+        Driver.getDriver().navigate().refresh();
         List<String> deletedFileNames = new ArrayList<>();
-        for (WebElement eachFile : this.deletedFiles) {
+        for (WebElement eachFile : deletedFiles) {
             deletedFileNames.add(eachFile.getText());
         }
-        assertTrue(deletedFileNames.contains(deletedFileName));
+        System.out.println("All Deleted Files = " + deletedFileNames);
+        System.out.println("Deleted File = " + randomlySelectedFileName);
+        assertTrue(deletedFileNames.contains(randomlySelectedFileName));
+    }
+
+    public void goToComments() {
+        actionsMenuClick("Details");
+        Driver.waitUntilClickable(commentsSection);
+        commentsSection.click();
+        Driver.waitUntilVisible(newCommentInput);
+    }
+
+    public void postNewComment() {
+        comment = "TestComment" + Driver.randomNumberGenerator(0, 1000);
+        Driver.waitUntilClickable(commentsSection);
+        commentsSection.click();
+        Driver.waitUntilVisible(newCommentInput);
+        newCommentInput.sendKeys(comment);
+    }
+
+    public void submitNewComment() {
+        commentSubmitBtn.click();
+    }
+
+    public void verifyNewComment() {
+        for (int i = 0; i < fileNames.size(); i++) {
+            if (fileNames.get(i).getText().equals(randomlySelectedFileName)) {
+                actionDots.get(i).click();
+            }
+        }
+        goToComments();
+        List<String> postedComments = new ArrayList<>();
+        for (WebElement eachComment : allPostedComments) {
+            postedComments.add(eachComment.getText());
+        }
+        System.out.println("All Posted Comments = " + postedComments);
+        System.out.println("New Comment = " + comment);
+        assertTrue(postedComments.contains(comment));
+    }
+
+    public void settingsCheckBoxSelect() {
+        for (int i = 0; i < settingsCommands.size(); i++) {
+            if (settingsCheckBoxes.get(i).isSelected()) {
+                settingsCommands.get(i).click();
+            }
+            if (!settingsCheckBoxes.get(i).isSelected()) {
+                settingsCommands.get(i).click();
+                assertTrue(settingsCheckBoxes.get(i).isSelected());
+            }
+        }
+    }
+
+    public void settingsClick() {
+        Driver.waitUntilClickable(settingsBtn);
+        settingsBtn.click();
+        Driver.sleep(1);
+    }
+
+    public double getCurrentStorage() {
+        String storage = currentStorageSize.getText();
+        StringBuilder temp = new StringBuilder();
+        double storageSize = 0;
+        for (int i = 0; i < storage.length(); i++) {
+            if (Character.isDigit(storage.charAt(i)) || storage.charAt(i) == '.') {
+                temp.append(storage.charAt(i));
+            }
+        }
+        storageSize = Double.parseDouble(temp.toString());
+        return storageSize;
+    }
+
+    public void getStorageBeforeUpload() {
+        storageBeforeUpload = getCurrentStorage();
+        System.out.println("Storage Before Upload = " + storageBeforeUpload);
+    }
+
+    public void getStorageAfterUpload() {
+        storageAfterUpload = getCurrentStorage();
+        System.out.println("Storage After Upload = " + storageAfterUpload);
+    }
+
+    public void verifyStorageIncrease() {
+        assertTrue(storageBeforeUpload < storageAfterUpload);
     }
 
 }
