@@ -13,7 +13,6 @@ import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.opera.OperaDriver;
 import org.openqa.selenium.opera.OperaOptions;
 import org.openqa.selenium.remote.DesiredCapabilities;
-import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.safari.SafariDriver;
 import org.openqa.selenium.safari.SafariOptions;
@@ -535,6 +534,13 @@ public final class Driver {
     public static void cleanUpDriver() {
         quitDriver();
         removeDriver();
+    }
+
+    /**
+     * Random number generator in range
+     */
+    public static int randomNumberGenerator(int min, int max) {
+        return (int) ((Math.random() * (max - min)) + min);
     }
 
 }
