@@ -8,8 +8,6 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
-import static org.junit.Assert.assertEquals;
-
 public class US4 {
 
     private final Login login = new Login();
@@ -42,5 +40,4 @@ public class US4 {
     public void verify_all_the_files_are_selected() {
         files.verifySelectAllBox();
     }
-
 }
