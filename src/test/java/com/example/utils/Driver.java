@@ -41,8 +41,8 @@ public final class Driver {
     private static String browser;
     private static final String defaultBrowser;
     private static final int defaultWaitTime;
-    private static final boolean enableGrid;
-    private static final String gridUrl;
+    private static boolean enableGrid;
+    private static String gridUrl;
 
     static {
         try {
@@ -81,6 +81,9 @@ public final class Driver {
      * @throws Exception
      */
     public static void createDriver() throws Exception {
+        if (System.getProperty("GRID") != null) {
+            enableGrid = Boolean.parseBoolean(System.getProperty("GRID"));
+        }
         if (enableGrid) {
             driverPool.set(createRemoteDriver());
         } else {
@@ -94,6 +97,9 @@ public final class Driver {
      * @throws MalformedURLException
      */
     private static WebDriver createRemoteDriver() throws MalformedURLException {
+        if (System.getProperty("HUBURL") != null) {
+            gridUrl = System.getProperty("HUBURL");
+        }
         String remoteUrl = gridUrl;
         RemoteWebDriver remoteWebDriver;
         if (browser.isBlank()) {
