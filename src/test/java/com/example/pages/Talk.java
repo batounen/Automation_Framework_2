@@ -48,6 +48,7 @@ public class Talk {
 
     public void submitBtnClick() {
         submitBtn.click();
+        Driver.sleep(1);
     }
 
     public void verifyMessage() {
