@@ -28,7 +28,7 @@ public class Talk {
     @FindBy(css = "button[type='submit']")
     private WebElement submitBtn;
 
-    @FindAll(@FindBy(css = ".rich-text--wrapper"))
+    @FindAll(@FindBy(css = ".wrapper .rich-text--wrapper"))
     private List<WebElement> allMessages;
 
     @FindBy(css = "button[slot='trigger']")
@@ -51,13 +51,13 @@ public class Talk {
     }
 
     public void verifyMessage() {
-        List<String> messagesString = new ArrayList<>();
+        List<String> messages = new ArrayList<>();
         for (WebElement eachMessage : allMessages) {
-            messagesString.add(eachMessage.getText());
+            messages.add(eachMessage.getText());
         }
-        System.out.println("All Messages = " + messagesString);
+        System.out.println("All Messages = " + messages);
         System.out.println("Test Message = " + testText);
-        assertTrue(messagesString.contains(testText));
+        assertTrue(messages.contains(testText));
     }
 
 }

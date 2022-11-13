@@ -17,9 +17,16 @@ public class Files {
     private String randomlySelectedFileName;
     private int randomNumFiles;
     private String comment;
-
     private double storageBeforeUpload;
     private double storageAfterUpload;
+
+//    Use below 2 lines if the test file is located somewhere outside the project folder
+    private final String uploadFilePath = Driver.getProperty("uploadTestFile");
+    private final String uploadFileName = uploadFilePath.substring(uploadFilePath.lastIndexOf("/") + 1, uploadFilePath.lastIndexOf("."));
+
+//    private final String temp = Driver.getProperty("uploadTestFile");
+//    private final int indexOfDot = temp.indexOf(".");
+//    private final String uploadFileName = temp.substring(0, indexOfDot);
 
     public Files() {
         PageFactory.initElements(Driver.getDriver(), this);
@@ -137,6 +144,9 @@ public class Files {
     @FindAll(@FindBy(css = "tr th input[type='checkbox'][id^='checkbox']"))
     private List<WebElement> conflictCheckboxes;
 
+    @FindBy(css = "label[for='select_all_trash']")
+    private WebElement checkAllTrash;
+
     public void selectAllBoxClick() {
         selectAllBox.click();
     }
@@ -200,8 +210,8 @@ public class Files {
 
     public void verifyFavFiles() {
         Files_Favorites files_favorites = new Files_Favorites();
-        System.out.println("clickedFiles = " + clickedFiles);
-        System.out.println("files_favorites.favFileList() = " + files_favorites.favFileList());
+        System.out.println("Clicked Files = " + clickedFiles);
+        System.out.println("Files in Favorites = " + files_favorites.favFileList());
         assertTrue(files_favorites.favFileList().containsAll(clickedFiles));
     }
 
@@ -247,26 +257,29 @@ public class Files {
     }
 
     public void directFileUpload() {
-        hiddenUploadField.sendKeys(Driver.getProperty("uploadTestFile"));
-        Driver.sleep(1);
-//        if (fileUploadConflictAlert.isDisplayed()) {
-//            newFileCheckbox.click();
-//            originalFileCheckbox.click();
-//            continueBtn.click();
-//        }
+        System.out.println("Upload File Name = " + uploadFileName);
+        for (int i = 0; i < fileNames.size(); i++) {
+            if (fileNames.get(i).getText().strip().equals(uploadFileName)) {
+                actionDots.get(i).click();
+                actionsMenuClick("Delete");
+                Driver.getDriver().navigate().refresh();
+                Driver.waitUntilClickable(uploadFileButton);
+                break;
+            }
+        }
+        uploadBtnClick();
+        hiddenUploadField.sendKeys(uploadFilePath);
         Driver.waitUntilInvisible(uploadLoadingBar);
     }
 
     public void verifyFileUpload() {
-        String uploadedFilePath = Driver.getProperty("uploadTestFile");
-        String uploadedFileName = uploadedFilePath.substring(uploadedFilePath.lastIndexOf("/") + 1, uploadedFilePath.indexOf("."));
         List<String> allVisibleFileNames = new ArrayList<>();
         for (WebElement fileName : fileNames) {
             allVisibleFileNames.add(fileName.getText());
         }
-        System.out.println(allVisibleFileNames);
-        System.out.println(uploadedFileName);
-        assertTrue(allVisibleFileNames.contains(uploadedFileName));
+        System.out.println("All Visible Files = " + allVisibleFileNames);
+        System.out.println("Uploaded File name = " + uploadFileName);
+        assertTrue(allVisibleFileNames.contains(uploadFileName));
     }
 
     public void newFolderNameSubmit() {
@@ -281,8 +294,8 @@ public class Files {
         for (WebElement fileName : fileNames) {
             allVisibleFileNames.add(fileName.getText());
         }
-        System.out.println("allVisibleFileNames = " + allVisibleFileNames);
-        System.out.println("newFolderName = " + newFolderName);
+        System.out.println("All Visible File Names = " + allVisibleFileNames);
+        System.out.println("New Folder Name = " + newFolderName);
         assertTrue(allVisibleFileNames.contains(newFolderName));
     }
 
@@ -310,7 +323,7 @@ public class Files {
     }
 
     public void verifyDeletedFile() {
-        Driver.getDriver().navigate().refresh();
+        Driver.waitUntilClickable(checkAllTrash);
         List<String> deletedFileNames = new ArrayList<>();
         for (WebElement eachFile : deletedFiles) {
             deletedFileNames.add(eachFile.getText());

@@ -36,4 +36,10 @@ public class US10 {
         Driver.sleep(5);
         files.getStorageAfterUpload();
     }
+
+    @Then("the user should be able to see storage usage is increased")
+    public void theUserShouldBeAbleToSeeStorageUsageIsIncreased() {
+        files.verifyStorageIncrease();
+    }
+
 }

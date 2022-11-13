@@ -12,7 +12,7 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.opera.OperaDriver;
 import org.openqa.selenium.opera.OperaOptions;
-import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.safari.SafariDriver;
 import org.openqa.selenium.safari.SafariOptions;
@@ -95,37 +95,30 @@ public final class Driver {
      */
     private static WebDriver createRemoteDriver() throws MalformedURLException {
         String remoteUrl = gridUrl;
-//        URL remoteUrl = new URL(gridUrl);
-        DesiredCapabilities desiredCapabilities;
-        WebDriver remoteWebDriver = null;
+        RemoteWebDriver remoteWebDriver;
         if (browser.isBlank()) {
             browser = defaultBrowser;
         }
         switch (browser) {
             case "firefox":
-                desiredCapabilities = new DesiredCapabilities();
-                desiredCapabilities.setBrowserName("firefox");
-                remoteWebDriver = new RemoteWebDriver(new URL(remoteUrl), desiredCapabilities);
+                FirefoxOptions firefoxOptions = new FirefoxOptions();
+                remoteWebDriver = new RemoteWebDriver(new URL(remoteUrl), firefoxOptions);
                 break;
             case "edge":
-                desiredCapabilities = new DesiredCapabilities();
-                desiredCapabilities.setBrowserName("edge");
-                remoteWebDriver = new RemoteWebDriver(new URL(remoteUrl), desiredCapabilities);
+                EdgeOptions edgeOptions = new EdgeOptions();
+                remoteWebDriver = new RemoteWebDriver(new URL(remoteUrl), edgeOptions);
                 break;
             case "safari":
-                desiredCapabilities = new DesiredCapabilities();
-                desiredCapabilities.setBrowserName("safari");
-                remoteWebDriver = new RemoteWebDriver(new URL(remoteUrl), desiredCapabilities);
+                SafariOptions safariOptions = new SafariOptions();
+                remoteWebDriver = new RemoteWebDriver(new URL(remoteUrl), safariOptions);
                 break;
             default:
-//                desiredCapabilities = new DesiredCapabilities();
-//                desiredCapabilities.setBrowserName("chrome");
-//                remoteWebDriver = new RemoteWebDriver(new URL(remoteUrl), desiredCapabilities);
                 ChromeOptions chromeOptions = new ChromeOptions();
                 remoteWebDriver = new RemoteWebDriver(new URL(remoteUrl), chromeOptions);
 
         }
         maxWindow(remoteWebDriver);
+        remoteWebDriver.setFileDetector(new LocalFileDetector());
         return remoteWebDriver;
     }
 

@@ -4,22 +4,17 @@ import io.cucumber.junit.Cucumber;
 import io.cucumber.junit.CucumberOptions;
 import org.junit.runner.RunWith;
 
+
 @RunWith(Cucumber.class)
 @CucumberOptions(
-        plugin = {
-                "pretty",
+        plugin = {"pretty",
                 "json:target/cucumber.json",
                 "html:target/cucumber-reports.html",
                 "junit:target/junit/junit-report.xml",
                 "rerun:target/rerun.txt",
-                "me.jvt.cucumber.report.PrettyReports:target/cucumber"
-        },
-        features = "src/test/resources/features",
+                "me.jvt.cucumber.report.PrettyReports:target/cucumber"},
         glue = "com/example/step_definitions",
-        tags = "@us6",
-        publish = true
+        features = "@target/rerun.txt"
 )
-
-public class CukesRunner {
-
+public class Rerun {
 }
