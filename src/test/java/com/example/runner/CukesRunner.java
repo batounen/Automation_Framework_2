@@ -16,7 +16,7 @@ import org.junit.runner.RunWith;
         },
         features = "src/test/resources/features",
         glue = "com/example/step_definitions",
-        tags = "@smoke",
+        tags = "@wip",
         publish = true
 )
 

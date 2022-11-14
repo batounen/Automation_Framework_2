@@ -21,12 +21,8 @@ public class Files {
     private double storageAfterUpload;
 
 //    Use below 2 lines if the test file is located somewhere outside the project folder
-    private final String uploadFilePath = Driver.getProperty("uploadTestFile");
-    private final String uploadFileName = uploadFilePath.substring(uploadFilePath.lastIndexOf("/") + 1, uploadFilePath.lastIndexOf("."));
-
-//    private final String temp = Driver.getProperty("uploadTestFile");
-//    private final int indexOfDot = temp.indexOf(".");
-//    private final String uploadFileName = temp.substring(0, indexOfDot);
+    private final String uploadFilePath = Driver.getProperty("uploadTestFilePath");
+    private final String uploadFileName = Driver.getProperty("uploadTestFileName");
 
     public Files() {
         PageFactory.initElements(Driver.getDriver(), this);
