@@ -15,12 +15,11 @@ public class Files {
 
     private final String newFolderName = "TestFolder" + Driver.randomNumberGenerator(0, 1000);
     private String randomlySelectedFileName;
-    private int randomNumFiles;
     private String comment;
     private double storageBeforeUpload;
     private double storageAfterUpload;
 
-//    Use below 2 lines if the test file is located somewhere outside the project folder
+    //    Use below 2 lines if the test file is located somewhere outside the project folder
     private final String uploadFilePath = Driver.getProperty("uploadTestFilePath");
     private final String uploadFileName = Driver.getProperty("uploadTestFileName");
 
@@ -195,7 +194,6 @@ public class Files {
                 actionsMenuClick("Remove from favorites");
                 Driver.sleep(1);
             }
-
         }
     }
 
@@ -305,7 +303,7 @@ public class Files {
     }
 
     public void randomActionDotsClick() {
-        randomNumFiles = Driver.randomNumberGenerator(0, actionDots.size());
+        int randomNumFiles = Driver.randomNumberGenerator(0, actionDots.size());
         randomlySelectedFileName = fileNames.get(randomNumFiles).getText();
         actionDots.get(randomNumFiles).click();
     }
